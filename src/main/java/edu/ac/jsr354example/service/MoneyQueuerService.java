@@ -23,6 +23,6 @@ public class MoneyQueuerService {
     }
 
     public MonetaryAmount pull() {
-        return repository.pull().getMoney();
+        return repository.pull().map(value -> value.getMoney()).orElse(null);
     }
 }
