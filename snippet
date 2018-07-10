@@ -1,4 +1,44 @@
+Introduction
+
+In Java, we never had a specific way to handle money amount. In Java early versions we had to use float and double but was so hard to deal with the money currency, precision, rounding and format. Then comes the BigDecimal and DecimalFormat that helped us in precision and makes formatting slightly easier. At last, in Java 1.4 Currency was released that improves the money formatting. Nevertheless, is still hard to work with money, we have a lot of problems like: we need to create a couple of objects do deal with money amount, we don't have a proper way to deal with currency conversions, no support for new currencies (like crypto coins) and we still have some issues when we need format the money ammount.
+
+That being said, I'll present the JSR 354 the java specification to handle money. The first release of this JSR was early in 2015 and the current version is 1.0.3. This is specification is targeted to Java SE but can be used in Java ME and Java EE as well.
+
+The reference implementation was written above Java 8 but there's a backport version available to Java 7. Now with all this having being said, let's right into it.
+
+Java Money - Dependencies
+
+Once the JSR 354 is still not released in Java SE or EE version, we need include two libraries: the JSR 354 API and a implementation of this API (of course, you can make your own implementation), in this snippet I'll use the Moneta implementation (you can check all important links in the end of this snippet).
+
+Maven:
+
+[code]
+<dependency>
+    <groupId>javax.money</groupId>
+    <artifactId>money-api</artifactId>
+    <version>1.0.3</version>
+</dependency>
+
+<dependency>
+    <groupId>org.javamoney</groupId>
+    <artifactId>moneta</artifactId>
+    <version>1.2.1</version>
+    <type>pom</type>
+</dependency>
+[/code]
+
+Gradle:
+
+[code]
+compile group: 'javax.money', name: 'money-api', version: '1.0.3'
+compile group: 'org.javamoney', name: 'moneta', version: '1.2.1'
+[/code]
+
+This API add a lot of classes, interfaces, utility classes and builders (builders are everywhere nowadays. We will the main features in this snippet, there's a example in the "Links" section with a simple usage of the JSR 354.
+
 
 
 Links:
 https://www.jcp.org/en/jsr/detail?id=354
+http://javamoney.github.io/
+https://github.com/JonathanOhara/jsr354example
