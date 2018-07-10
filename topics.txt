@@ -1,0 +1,29 @@
+Topics
+Double precision IEEE-754
+
+Currencies:
+Monetary
+CurrencyUnit
+CurrencyQueryBuilder
+
+Monetary Ammount:
+Monetary
+MonetaryAmmount - high precision
+MonetaryAmmountFactoryQueryBuilder
+
+Rounding:
+Monetary
+MonetaryRounding
+RoundingQueryBuilder
+
+Conversion:
+MonetaryConversion
+CurrencyConversion
+ConversionQueryBuilder
+
+Formats:
+MonetaryFormats
+MonetaryAmmountFormat
+AmmountFormatQueryBuilder
+
+Stream
