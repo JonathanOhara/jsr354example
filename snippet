@@ -1,6 +1,6 @@
 Introduction
 
-In Java, we never had a specific way to handle money amount. In Java early versions we had to use float and double but was so hard to deal with the money currency, precision, rounding and format. Then comes the BigDecimal and DecimalFormat that helped us in precision and makes formatting slightly easier. At last, in Java 1.4 Currency was released that improves the money formatting. Nevertheless, is still hard to work with money, we have a lot of problems like: we need to create a couple of objects do deal with money amount, we don't have a proper way to deal with currency conversions, no support for new currencies (like crypto coins) and we still have some issues when we need format the money ammount.
+In Java, we never had a specific way to handle money amount. In Java early versions we had to use float and double but was so hard to deal with the money currency, precision, rounding and format. Then comes the BigDecimal and DecimalFormat that helped us in precision and makes formatting slightly easier. At last, in Java 1.4 Currency was released that improves the money formatting. Nevertheless, is still hard to work with money, we have a lot of problems like: we need to create a couple of objects do deal with money amount, we don't have a proper way to deal with currency conversions, no support for new currencies (like crypto coins) and we still have some issues when we need format the money amount.
 
 That being said, I'll present the JSR 354 the java specification to handle money. The first release of this JSR was early in 2015 and the current version is 1.0.3. This is specification is targeted to Java SE but can be used in Java ME and Java EE as well.
 
@@ -34,9 +34,167 @@ compile group: 'javax.money', name: 'money-api', version: '1.0.3'
 compile group: 'org.javamoney', name: 'moneta', version: '1.2.1'
 [/code]
 
-This API add a lot of classes, interfaces, utility classes and builders (builders are everywhere nowadays. We will the main features in this snippet, there's a example in the "Links" section with a simple usage of the JSR 354.
+This API add a lot of classes, interfaces, utility classes and builders (builders are everywhere nowadays). We will the main features in this snippet, there's a example in the "Links" section with a simple usage of the JSR 354.
 
+The main class of this API is the Monetary class. From this class we can get we can get the all available currencies, rounding and some factories.
 
+Currencies
+
+We got two main ways to get the CurrencyUnit:
+
+[code]
+CurrencyUnit brazilianReal = Monetary.getCurrency("BRL");
+CurrencyUnit germanyCurrency = Monetary.getCurrency(Locale.GERMANY)
+[/code]
+
+There's a CurrencyQueryBuilder to found the currency that you want:
+
+[code]
+Monetary.getCurrency( CurrencyQueryBuilder.of().setCountries( new Locale("pt", "BR") ).build() )
+[/code]
+
+There's some important information inside CurrencyUnit like the currency code and the number of fractal digits as the following:
+
+[code]
+brazilianReal.getCurrencyCode();
+brazilianReal.getDefaultFractionDigits();
+[/code]
+
+Money amount
+
+The MonetaryAmount is the object that join the money value with the currency unit. In code below we have two examples:
+
+[code]
+MonetaryAmount money = Money.of(240, brazilianReal);
+MonetaryAmount fastMoney = FastMoney.of(240, brazilianReal);
+[/code]
+
+The main difference between Money.of and FastMoney of is the precision and performance. Money.of has a a precision of 256 digits while FastMoney 19 digits.
+Of course, we can get just the number or just the currency of the MonetaryAmount:
+
+[code]
+CurrencyUnit currency = money.getCurrency();
+NumberValue value = money.getNumber();
+[/code]
+
+With NumberValue object we can access some helpful methods like get amount as double:
+
+[code]
+money.getNumber().doubleValue()
+[/code]
+
+Get just the fractional part:
+
+[code]
+money.getNumber().getAmountFractionNumerator()
+[/code]
+
+Or just the non fractional part:
+
+[code]
+money.getNumber().longValue()
+[/code]
+
+We can use the MonetaryQueries to do operations with money:
+
+[code]
+amount.with(MonetaryOperators.majorPart()); //Get non fractional numbers
+amount.with(MonetaryOperators.minorPart()); //Ger fractional numbers
+amount.with(MonetaryOperators.percent(50)); //50% of the value
+[/code]
+
+Surely, we have a builder to set the parameters like precision of MonetaryAmount:
+
+[code]
+MonetaryAmountFactoryQuery monetaryAmountFactoryQuery = MonetaryAmountFactoryQueryBuilder.of().setPrecision(50).build();
+MonetaryAmount monetaryAmount = Monetary.getAmountFactory(monetaryAmountFactoryQuery).setCurrency("EUR").setNumber(200).create();
+[/code]
+
+Rounding
+
+Another important thing when we work with money is the rounding. When we use Math.round, Math.ceil or Math.floor for float and double values the fractional value is removed, working with money the rounding must work with the number of fractional numbers of that specific currency (currencies like LYD, KWD, BHD and CLF has more than 2 fractional digits). Let's see an example:
+
+[code]
+CurrencyUnit KWD = Monetary.getCurrency("KWD");
+CurrencyUnit USD = Monetary.getCurrency("USD");
+
+System.out.println(Monetary.getRounding(KWD).apply(Money.of(1.41199999, KWD))); //Output: KWD 1.412
+System.out.println(Monetary.getRounding(KWD).apply(Money.of(1.5006, KWD))); //Output: KWD 1.501
+
+System.out.println(Monetary.getRounding(USD).apply(Money.of(1.41199999, USD))); //Output: USD 1.41
+System.out.println(Monetary.getRounding(USD).apply(Money.of(1.5006, USD))); //Output: KWD USD 1.5
+[/code]
+
+Why not use builders? Let's check how do that:
+
+[code]
+CurrencyUnit USD = Monetary.getCurrency("USD");
+
+Monetary.getRounding( RoundingQueryBuilder.of().setCurrency(USD).build() ).apply(Money.of(1.41199999, USD))
+[/code]
+
+Conversion
+
+One of the most amazing features of this API is the conversion between currencies.
+
+First of all, the API uses a provider to get the exchange rate. The providers use the internet to get the current values but you can write your own provider that can use non internet resources.
+
+Let's see a simple example of money conversion:
+
+[code]
+CurrencyUnit BRL = Monetary.getCurrency("BRL");
+CurrencyConversion dollarConversion = MonetaryConversions.getConversion("USD");
+Money.of(250, BRL).with(dollarConversion);
+[/code]
+
+The default exchange provider is the Europe Central Bank. When you run this piece of code, you can check some messages about reading the rates. Moneta implementation comes with some others provider, you can choose another provider as the following:
+
+[code]
+ExchangeRateProvider provider = MonetaryConversions.getExchangeRateProvider(ExchangeRateType.IMF);
+CurrencyConversion currencyConversion = provider.getCurrencyConversion(REAL);
+MonetaryAmount realAmount = Money.of(120, USD);
+currencyConversion.apply(realAmount);
+[/code]
+
+Formatting and parse
+
+Formatting it not just put the currency code and the value, some countries uses ",", some other uses "." to separate fractional digits. There's difference between the order of currency and value, like the following example:
+
+[code]
+MonetaryAmountFormat germanyFormat = MonetaryFormats.getAmountFormat(Locale.GERMANY);
+System.out.println(germanyFormat.format(Money.of(123.50, "EUR")));
+//Output: 123,50 EUR
+
+MonetaryAmountFormat italyFormat = MonetaryFormats.getAmountFormat(Locale.ITALY);
+System.out.println(italyFormat.format(Money.of(123.50, "EUR")));
+//Output: EUR 123,50
+
+MonetaryAmountFormat brazilFormat = MonetaryFormats.getAmountFormat(new Locale("pt", "BR"));
+System.out.println(brazilFormat.format(Money.of(123.50, "BRL")));
+//Output: BRL 123,50
+
+MonetaryAmountFormat usFormat = MonetaryFormats.getAmountFormat(Locale.US);
+System.out.println(usFormat.format(Money.of(123.50, "USD")));
+//Output: USD123.50
+[/code]
+
+And here is the Builder for that:
+
+[code]
+MonetaryAmountFormat builderFormat = MonetaryAmountDecimalFormatBuilder.of("R$ ###,###.00").build();
+System.out.println(builderFormat.format(Money.of(1000.22, "BRL")));
+[/code]
+
+You can parse a String directly to the MoneyAmount but you need to inform what format the String is using like the following:
+
+[code]
+MonetaryAmountFormat usFormat = MonetaryFormats.getAmountFormat(Locale.US);
+MonetaryAmount moneyParsed = Money.parse("USD25.50", usFormat);
+[/code]
+
+Validation
+
+Zalando validation
 
 Links:
 https://www.jcp.org/en/jsr/detail?id=354
