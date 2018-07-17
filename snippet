@@ -1,120 +1,202 @@
+<h2>
 Introduction
+</h2>
 
+<p>
 In Java, we never had a specific way to handle money amount. In Java early versions we had to use float and double but was so hard to deal with the money currency, precision, rounding and format. Then comes the BigDecimal and DecimalFormat that helped us in precision and makes formatting slightly easier. At last, in Java 1.4 Currency was released that improves the money formatting. Nevertheless, is still hard to work with money, we have a lot of problems like: we need to create a couple of objects do deal with money amount, we don't have a proper way to deal with currency conversions, no support for new currencies (like crypto coins) and we still have some issues when we need format the money amount.
+</p>
 
-That being said, I'll present the JSR 354 the java specification to handle money. The first release of this JSR was early in 2015 and the current version is 1.0.3. This is specification is targeted to Java SE but can be used in Java ME and Java EE as well.
+<p>
+That being said, I'll present the JSR 354 the Java specification to handle money. The first release of this JSR was early in 2015 and the current version is 1.0.3. This is specification is targeted to Java SE but can be used in Java ME and Java EE as well.
+</p>
 
+<p>
 The reference implementation was written above Java 8 but there's a backport version available to Java 7. Now with all this having being said, let's right into it.
+</p>
 
+<h2>
 Java Money - Dependencies
+</h2>
 
+<p>
 Once the JSR 354 is still not released in Java SE or EE version, we need include two libraries: the JSR 354 API and a implementation of this API (of course, you can make your own implementation), in this snippet I'll use the Moneta implementation (you can check all important links in the end of this snippet).
+</p>
 
+<p>
 Maven:
+</p>
 
-[code]
-<dependency>
-    <groupId>javax.money</groupId>
-    <artifactId>money-api</artifactId>
-    <version>1.0.3</version>
-</dependency>
+<pre>
+&lt;dependency&gt;
+    &lt;groupId&gt;javax.money&lt;/groupId&gt;
+    &lt;artifactId&gt;money-api&lt;/artifactId&gt;
+    &lt;version&gt;1.0.3&lt;/version&gt;
+&lt;/dependency&gt;
 
-<dependency>
-    <groupId>org.javamoney</groupId>
-    <artifactId>moneta</artifactId>
-    <version>1.2.1</version>
-    <type>pom</type>
-</dependency>
-[/code]
+&lt;dependency&gt;
+    &lt;groupId&gt;org.javamoney&lt;/groupId&gt;
+    &lt;artifactId&gt;moneta&lt;/artifactId&gt;
+    &lt;version&gt;1.2.1&lt;/version&gt;
+&lt;/dependency&gt;
+</pre>
 
+<p>
 Gradle:
+</p>
 
-[code]
+<pre>
 compile group: 'javax.money', name: 'money-api', version: '1.0.3'
 compile group: 'org.javamoney', name: 'moneta', version: '1.2.1'
-[/code]
+</pre>
 
+<p>
 This API add a lot of classes, interfaces, utility classes and builders (builders are everywhere nowadays). We will the main features in this snippet, there's a example in the "Links" section with a simple usage of the JSR 354.
+</p>
 
+<p>
 The main class of this API is the Monetary class. From this class we can get we can get the all available currencies, rounding and some factories.
+</p>
 
+<h2>
 Currencies
+</h2>
 
+<p>
 We got two main ways to get the CurrencyUnit:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/9900dc954f965f228d3b91dad7701f76.js"></script>
+<!--
+<pre>
 CurrencyUnit brazilianReal = Monetary.getCurrency("BRL");
-CurrencyUnit germanyCurrency = Monetary.getCurrency(Locale.GERMANY)
-[/code]
+CurrencyUnit germanyCurrency = Monetary.getCurrency(Locale.GERMANY);
+</pre>
+-->
 
+<p>
 There's a CurrencyQueryBuilder to found the currency that you want:
+</p>
 
-[code]
-Monetary.getCurrency( CurrencyQueryBuilder.of().setCountries( new Locale("pt", "BR") ).build() )
-[/code]
+<script src="https://gist.github.com/JonathanOhara/0fc10b9b92cb374c2e89a414bb6c88d1.js"></script>
+<!--
+<pre>
+Monetary.getCurrency( CurrencyQueryBuilder.of().setCountries( new Locale("pt", "BR") ).build() );
+</pre>
+-->
 
+<p>
 There's some important information inside CurrencyUnit like the currency code and the number of fractal digits as the following:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/f71fa110372d3350c329f177188a51d3.js"></script>
+<!--
+<pre>
 brazilianReal.getCurrencyCode();
 brazilianReal.getDefaultFractionDigits();
-[/code]
+</pre>
+-->
 
+<h2>
 Money amount
+</h2>
 
+<p>
 The MonetaryAmount is the object that join the money value with the currency unit. In code below we have two examples:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/e57a0e5af6de32bc76137d6b0e1a11a5.js"></script>
+<!--
+<pre>
 MonetaryAmount money = Money.of(240, brazilianReal);
 MonetaryAmount fastMoney = FastMoney.of(240, brazilianReal);
-[/code]
+</pre>
+-->
 
+<p>
 The main difference between Money.of and FastMoney of is the precision and performance. Money.of has a a precision of 256 digits while FastMoney 19 digits.
-Of course, we can get just the number or just the currency of the MonetaryAmount:
+</p>
 
-[code]
+<p>
+Of course, we can get just the number(value) or just get the currency of the MonetaryAmount:
+</p>
+
+<script src="https://gist.github.com/JonathanOhara/f1e668b157007ee5fbc75a10cb83dfc3.js"></script>
+<!--
+<pre>
 CurrencyUnit currency = money.getCurrency();
 NumberValue value = money.getNumber();
-[/code]
+</pre>
+-->
 
+<p>
 With NumberValue object we can access some helpful methods like get amount as double:
+</p>
 
-[code]
-money.getNumber().doubleValue()
-[/code]
+<script src="https://gist.github.com/JonathanOhara/5bfc04008471188477faf65ee63ac356.js"></script>
+<!--
+<pre>
+money.getNumber().doubleValue();
+</pre>
+-->
 
+<p>
 Get just the fractional part:
+</p>
 
-[code]
-money.getNumber().getAmountFractionNumerator()
-[/code]
+<script src="https://gist.github.com/JonathanOhara/bc86141f4ff54a11ed5c2b329a1f9d79.js"></script>
+<!--
+<pre>
+money.getNumber().getAmountFractionNumerator();
+</pre>
+-->
 
+<p>
 Or just the non fractional part:
+</p>
 
-[code]
-money.getNumber().longValue()
-[/code]
+<script src="https://gist.github.com/JonathanOhara/025447453bd5f44a820a61374444d109.js"></script>
+<!--
+<pre>
+money.getNumber().longValue();
+</pre>
+-->
 
+<p>
 We can use the MonetaryQueries to do operations with money:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/0b3beeac3b2db923c2d15c3e9a7a16d8.js"></script>
+<!--
+<pre>
 amount.with(MonetaryOperators.majorPart()); //Get non fractional numbers
 amount.with(MonetaryOperators.minorPart()); //Ger fractional numbers
 amount.with(MonetaryOperators.percent(50)); //50% of the value
-[/code]
+</pre>
+-->
 
+<p>
 Surely, we have a builder to set the parameters like precision of MonetaryAmount:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/dd6f15e6a4e243165e6656691093c8c5.js"></script>
+<!--
+<pre>
 MonetaryAmountFactoryQuery monetaryAmountFactoryQuery = MonetaryAmountFactoryQueryBuilder.of().setPrecision(50).build();
 MonetaryAmount monetaryAmount = Monetary.getAmountFactory(monetaryAmountFactoryQuery).setCurrency("EUR").setNumber(200).create();
-[/code]
+</pre>
+-->
 
+<h2>
 Rounding
+</h2>
 
+<p>
 Another important thing when we work with money is the rounding. When we use Math.round, Math.ceil or Math.floor for float and double values the fractional value is removed, working with money the rounding must work with the number of fractional numbers of that specific currency (currencies like LYD, KWD, BHD and CLF has more than 2 fractional digits). Let's see an example:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/2a94e60f4c2eb7c0718134bfb96a8eb4.js"></script>
+<!--
+<pre>
 CurrencyUnit KWD = Monetary.getCurrency("KWD");
 CurrencyUnit USD = Monetary.getCurrency("USD");
 
@@ -123,44 +205,73 @@ System.out.println(Monetary.getRounding(KWD).apply(Money.of(1.5006, KWD))); //Ou
 
 System.out.println(Monetary.getRounding(USD).apply(Money.of(1.41199999, USD))); //Output: USD 1.41
 System.out.println(Monetary.getRounding(USD).apply(Money.of(1.5006, USD))); //Output: KWD USD 1.5
-[/code]
+</pre>
+-->
 
+<p>
 Why not use builders? Let's check how do that:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/b5b4a3b0689c96d5381a3219a515d0f6.js"></script>
+<!--
+<pre>
 CurrencyUnit USD = Monetary.getCurrency("USD");
 
-Monetary.getRounding( RoundingQueryBuilder.of().setCurrency(USD).build() ).apply(Money.of(1.41199999, USD))
-[/code]
+Monetary.getRounding( RoundingQueryBuilder.of().setCurrency(USD).build() ).apply(Money.of(1.41199999, USD));
+</pre>
+-->
 
+<h2>
 Conversion
+</h2>
 
+<p>
 One of the most amazing features of this API is the conversion between currencies.
+</p>
 
+<p>
 First of all, the API uses a provider to get the exchange rate. The providers use the internet to get the current values but you can write your own provider that can use non internet resources.
+</p>
 
+<p>
 Let's see a simple example of money conversion:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/03a1251f0358b2e1d8817da8db37f3a6.js"></script>
+<!--
+<pre>
 CurrencyUnit BRL = Monetary.getCurrency("BRL");
 CurrencyConversion dollarConversion = MonetaryConversions.getConversion("USD");
 Money.of(250, BRL).with(dollarConversion);
-[/code]
+</pre>
+-->
 
+<p>
 The default exchange provider is the Europe Central Bank. When you run this piece of code, you can check some messages about reading the rates. Moneta implementation comes with some others provider, you can choose another provider as the following:
+</p>
 
-[code]
+
+<script src="https://gist.github.com/JonathanOhara/67e54dfe40ff4e55a5709b05037ec9b6.js"></script>
+<!--
+<pre>
 ExchangeRateProvider provider = MonetaryConversions.getExchangeRateProvider(ExchangeRateType.IMF);
 CurrencyConversion currencyConversion = provider.getCurrencyConversion(REAL);
 MonetaryAmount realAmount = Money.of(120, USD);
 currencyConversion.apply(realAmount);
-[/code]
+</pre>
+-->
 
+<h2>
 Formatting and parse
+</h2>
 
+<p>
 Formatting it not just put the currency code and the value, some countries uses ",", some other uses "." to separate fractional digits. There's difference between the order of currency and value, like the following example:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/8e323540a5764b72f2c4d232ed59538f.js"></script>
+<!--
+<pre>
 MonetaryAmountFormat germanyFormat = MonetaryFormats.getAmountFormat(Locale.GERMANY);
 System.out.println(germanyFormat.format(Money.of(123.50, "EUR")));
 //Output: 123,50 EUR
@@ -176,27 +287,54 @@ System.out.println(brazilFormat.format(Money.of(123.50, "BRL")));
 MonetaryAmountFormat usFormat = MonetaryFormats.getAmountFormat(Locale.US);
 System.out.println(usFormat.format(Money.of(123.50, "USD")));
 //Output: USD123.50
-[/code]
+</pre>
+-->
 
+<p>
 And here is the Builder for that:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/785bae72dcd60a84a9bc18f61a469f9e.js"></script>
+<!--
+<pre>
 MonetaryAmountFormat builderFormat = MonetaryAmountDecimalFormatBuilder.of("R$ ###,###.00").build();
 System.out.println(builderFormat.format(Money.of(1000.22, "BRL")));
-[/code]
+//Output: R$ 1,000.22
+</pre>
+-->
 
+<p>
 You can parse a String directly to the MoneyAmount but you need to inform what format the String is using like the following:
+</p>
 
-[code]
+<script src="https://gist.github.com/JonathanOhara/5e7b47809ae2e788ca0653842f8e62d7.js"></script>
+<!--
+<pre>
 MonetaryAmountFormat usFormat = MonetaryFormats.getAmountFormat(Locale.US);
 MonetaryAmount moneyParsed = Money.parse("USD25.50", usFormat);
-[/code]
+</pre>
+-->
 
-Validation
+<h2>
+The JSR 354 is very flexible way to handle money
+</h2>
 
-Zalando validation
+<h2>
+Links
+</h2>
 
-Links:
+<p>
+<a href="https://www.jcp.org/en/jsr/detail?id=354">
 https://www.jcp.org/en/jsr/detail?id=354
+</a>
+</p>
+<p>
+<a href="http://javamoney.github.io/">
 http://javamoney.github.io/
+</a>
+</p>
+<p>
+<a href="https://github.com/JonathanOhara/jsr354example">
 https://github.com/JonathanOhara/jsr354example
+</a>
+</p>
