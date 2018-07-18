@@ -10,12 +10,8 @@ import javax.money.format.MonetaryAmountFormat;
 @SpringBootApplication
 public class App {
     public static void main(String[] args) {
+        SpringApplication.run(App.class, args);
 
-
-        MonetaryAmountFormat builderFormat = MonetaryAmountDecimalFormatBuilder.of("R$ ###,###.00").build();
-
-        System.out.println(builderFormat.format(Money.of(1000.22, "BRL")));
-//        SpringApplication.run(App.class, args);
 
     }
 }
