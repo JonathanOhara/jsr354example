@@ -3,11 +3,11 @@ Introduction
 </h2>
 
 <p>
-In Java, we never had a specific way to handle money amount. In Java early versions we had to use float and double but was so hard to deal with the money currency, precision, rounding and format. Then comes the BigDecimal and DecimalFormat that helped us in precision and makes formatting slightly easier. At last, in Java 1.4 Currency was released that improves the money formatting. Nevertheless, is still hard to work with money, we have a lot of problems like: we need to create a couple of objects do deal with money amount, we don't have a proper way to deal with currency conversions, no support for new currencies (like crypto coins) and we still have some issues when we need format the money amount.
+In Java, we never had a specific way to handle money amount. In Java early versions we had to use float and double but was so hard to deal with the money currency, precision (see IEEE-754), rounding and format. Then comes the BigDecimal and DecimalFormat that helped us in precision and makes formatting slightly easier. At last, in Java 1.4 Currency was released that improves the money formatting. Nevertheless, is still hard to work with money, we have a lot of problems like: we need to create a couple of objects do deal with money amount, we don't have a proper way to deal with currency conversions, no support for new currencies (like crypto coins) and we still have some issues when we need format the money amount to different regions.
 </p>
 
 <p>
-That being said, I'll present the JSR 354 the Java specification to handle money. The first release of this JSR was early in 2015 and the current version is 1.0.3. This is specification is targeted to Java SE but can be used in Java ME and Java EE as well.
+That being said, I'll present the JSR 354, the Java specification to handle money. The first release of this JSR was early in 2015 and the current version is 1.0.3. This is specification is targeted to Java SE but can be used in Java ME and Java EE as well.
 </p>
 
 <p>
@@ -19,7 +19,7 @@ Java Money - Dependencies
 </h2>
 
 <p>
-Once the JSR 354 is still not released in Java SE or EE version, we need include two libraries: the JSR 354 API and a implementation of this API (of course, you can make your own implementation), in this snippet I'll use the Moneta implementation (you can check all important links in the end of this snippet).
+Once the JSR 354 is still not released in Java SE or EE version, we need include two libraries: the JSR 354 API and a implementation of this API (of course, you can make your own implementation), in this snippet I'll use the Moneta implementation (you can check all important links at the end of this snippet).
 </p>
 
 <p>
@@ -50,11 +50,11 @@ compile group: 'org.javamoney', name: 'moneta', version: '1.2.1'
 </pre>
 
 <p>
-This API add a lot of classes, interfaces, utility classes and builders (builders are everywhere nowadays). We will the main features in this snippet, there's a example in the "Links" section with a simple usage of the JSR 354.
+This API add a lot of classes, interfaces, utility classes and builders (builders are everywhere nowadays). We will check the main features in this snippet, there's a example in the "Links" section with a simple usage of the JSR 354.
 </p>
 
 <p>
-The main class of this API is the Monetary class. From this class we can get we can get the all available currencies, rounding and some factories.
+The main class of this API is the Monetary class. From this class we can reach currencies, rounding and some factories.
 </p>
 
 <h2>
@@ -91,8 +91,10 @@ There's some important information inside CurrencyUnit like the currency code an
 <script src="https://gist.github.com/JonathanOhara/f71fa110372d3350c329f177188a51d3.js"></script>
 <!--
 <pre>
-brazilianReal.getCurrencyCode();
-brazilianReal.getDefaultFractionDigits();
+CurrencyUnit brazilianReal = Monetary.getCurrency("BRL");
+
+System.out.println( brazilianReal.getCurrencyCode() ); //Output: BRL
+System.out.println( brazilianReal.getDefaultFractionDigits() ); //Output: 2
 </pre>
 -->
 
@@ -101,7 +103,7 @@ Money amount
 </h2>
 
 <p>
-The MonetaryAmount is the object that join the money value with the currency unit. In code below we have two examples:
+The MonetaryAmount is the object that joins the money value with the currency unit. In the code below we have two examples:
 </p>
 
 <script src="https://gist.github.com/JonathanOhara/e57a0e5af6de32bc76137d6b0e1a11a5.js"></script>
@@ -113,7 +115,7 @@ MonetaryAmount fastMoney = FastMoney.of(240, brazilianReal);
 -->
 
 <p>
-The main difference between Money.of and FastMoney of is the precision and performance. Money.of has a a precision of 256 digits while FastMoney 19 digits.
+The main difference between Money.of and FastMoney.of is the precision and performance. Money.of has a a precision of 256 digits while FastMoney 19 digits.
 </p>
 
 <p>
@@ -129,7 +131,7 @@ NumberValue value = money.getNumber();
 -->
 
 <p>
-With NumberValue object we can access some helpful methods like get amount as double:
+With NumberValue object we can access some helpful methods like getting amount as double:
 </p>
 
 <script src="https://gist.github.com/JonathanOhara/5bfc04008471188477faf65ee63ac356.js"></script>
@@ -140,7 +142,7 @@ money.getNumber().doubleValue();
 -->
 
 <p>
-Get just the fractional part:
+Getting just the fractional part:
 </p>
 
 <script src="https://gist.github.com/JonathanOhara/bc86141f4ff54a11ed5c2b329a1f9d79.js"></script>
@@ -230,7 +232,7 @@ One of the most amazing features of this API is the conversion between currencie
 </p>
 
 <p>
-First of all, the API uses a provider to get the exchange rate. The providers use the internet to get the current values but you can write your own provider that can use non internet resources.
+First of all, the API uses a provider to get the exchange rate. The providers use the internet to get the current values but you can write your own provider that can use offline resources.
 </p>
 
 <p>
@@ -247,9 +249,8 @@ Money.of(250, BRL).with(dollarConversion);
 -->
 
 <p>
-The default exchange provider is the Europe Central Bank. When you run this piece of code, you can check some messages about reading the rates. Moneta implementation comes with some others provider, you can choose another provider as the following:
+The default exchange provider is the European Central Bank. When you run this piece of code, you can check some messages about reading the rates. Moneta implementation comes with some other provider, you can change the provider as the following:
 </p>
-
 
 <script src="https://gist.github.com/JonathanOhara/67e54dfe40ff4e55a5709b05037ec9b6.js"></script>
 <!--
@@ -266,7 +267,7 @@ Formatting and parse
 </h2>
 
 <p>
-Formatting it not just put the currency code and the value, some countries uses ",", some other uses "." to separate fractional digits. There's difference between the order of currency and value, like the following example:
+Formatting it not just put the currency code and the value, some countries uses ",", some other uses "." to separate fractional digits. There's difference between the disposal order of currency and value, like the following example:
 </p>
 
 <script src="https://gist.github.com/JonathanOhara/8e323540a5764b72f2c4d232ed59538f.js"></script>
@@ -316,8 +317,13 @@ MonetaryAmount moneyParsed = Money.parse("USD25.50", usFormat);
 -->
 
 <h2>
-The JSR 354 is very flexible way to handle money
+Conclusion
 </h2>
+
+<p>
+The JSR 354 is a very flexible and extensible way to handle money. These days the applications reach a huge number of countries, with this JSR we can offer to our users a better experience when they visualize money values (in terms of conversion and formatting), being ready to new currencies like crypto coins is another important point. In the Links section, there's a link to my GitHub where I made a simple REST application to show some example operations and an implementation of a new currency as well its own conversion handler.
+
+</p>
 
 <h2>
 Links
