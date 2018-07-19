@@ -1,6 +1,7 @@
 package edu.ac.jsr354example.provider;
 
 
+import org.javamoney.moneta.CurrencyUnitBuilder;
 import org.javamoney.moneta.convert.ExchangeRateBuilder;
 import org.javamoney.moneta.spi.AbstractRateProvider;
 import org.javamoney.moneta.spi.DefaultNumberValue;
@@ -9,13 +10,14 @@ import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 import javax.money.NumberValue;
 import javax.money.convert.*;
+import java.util.stream.Stream;
 
 public class CryptoCoinExchangeRateProvider extends AbstractRateProvider {
 
     private CurrencyUnit BRL = Monetary.getCurrency("BRL");
-    private CurrencyUnit CCC = Monetary.getCurrency("CCC");
+    private CurrencyUnit CCC = CurrencyUnitBuilder.of("CCC", "CryptoCoinProvider").build();
 
-    private static final ProviderContext context = ProviderContextBuilder.of("CryptoCoinProvider", RateType.ANY ).build();
+    private static final ProviderContext context = ProviderContextBuilder.of("CryptoCoinExchangeProvider", RateType.ANY ).build();
 
 
     public CryptoCoinExchangeRateProvider(){
