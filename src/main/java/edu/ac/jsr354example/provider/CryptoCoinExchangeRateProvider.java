@@ -17,7 +17,7 @@ public class CryptoCoinExchangeRateProvider extends AbstractRateProvider {
     private CurrencyUnit BRL = Monetary.getCurrency("BRL");
     private CurrencyUnit CCC = CurrencyUnitBuilder.of("CCC", "CryptoCoinProvider").build();
 
-    private static final ProviderContext context = ProviderContextBuilder.of("CryptoCoinExchangeProvider", RateType.ANY ).build();
+    private static final ProviderContext context = ProviderContextBuilder.of("CryptoCoinExchangeProvider", RateType.ANY ).set("providerDescription","ola").build();
 
 
     public CryptoCoinExchangeRateProvider(){

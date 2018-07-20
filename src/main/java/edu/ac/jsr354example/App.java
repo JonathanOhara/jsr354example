@@ -30,7 +30,7 @@ public class App {
         CurrencyUnit brl = Monetary.getCurrency("BRL");
 
 
-        ExchangeRateProvider rateProvider = MonetaryConversions.getExchangeRateProvider("CryptoCoinExchangeProvider");
+        ExchangeRateProvider rateProvider = MonetaryConversions.getExchangeRateProvider();
 
         System.out.println(rateProvider);
 
