@@ -8,9 +8,7 @@ import org.javamoney.moneta.spi.DefaultNumberValue;
 
 import javax.money.CurrencyUnit;
 import javax.money.Monetary;
-import javax.money.NumberValue;
 import javax.money.convert.*;
-import java.util.stream.Stream;
 
 public class CryptoCoinExchangeRateProvider extends AbstractRateProvider {
 
