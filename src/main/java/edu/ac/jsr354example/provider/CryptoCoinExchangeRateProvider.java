@@ -11,15 +11,14 @@ import javax.money.Monetary;
 import javax.money.convert.*;
 
 public class CryptoCoinExchangeRateProvider extends AbstractRateProvider {
+    private static final ProviderContext CONTEXT;
 
     private CurrencyUnit BRL = Monetary.getCurrency("BRL");
     private CurrencyUnit CCC = CurrencyUnitBuilder.of("CCC", "CryptoCoinProvider").build();
 
-    private static final ProviderContext context = ProviderContextBuilder.of("CryptoCoinExchangeProvider", RateType.ANY ).set("providerDescription","ola").build();
-
 
     public CryptoCoinExchangeRateProvider(){
-        super(context);
+        super(CONTEXT);
     }
 
     public CryptoCoinExchangeRateProvider( final ProviderContext providerContext ){
@@ -35,15 +34,15 @@ public class CryptoCoinExchangeRateProvider extends AbstractRateProvider {
         if(from.equals(CCC) && to.equals(CCC) )
             return builderExchangeRate(from, to, 1.0f);
         else if(from.equals(CCC) && to.equals(BRL) )
-            return builderExchangeRate(from, to, 0.5f);
+            return builderExchangeRate(from, to, 100.0f);
         else if(from.equals(BRL) && to.equals(CCC) )
-            return builderExchangeRate(from, to, 2.0f);
+            return builderExchangeRate(from, to, 0.01f);
 
         return null;
     }
 
     private ExchangeRate builderExchangeRate(CurrencyUnit from, CurrencyUnit to,final Number multiplier) {
-        ExchangeRateBuilder builder = new ExchangeRateBuilder( ConversionContextBuilder.create(getContext(), RateType.ANY).build() );
+        ExchangeRateBuilder builder = new ExchangeRateBuilder( ConversionContextBuilder.create(getContext(), RateType.DEFERRED).build() );
 
         return builder.setBase(from).
                 setTerm(to).
@@ -51,4 +50,7 @@ public class CryptoCoinExchangeRateProvider extends AbstractRateProvider {
                 build();
     }
 
+    static {
+        CONTEXT = ProviderContextBuilder.of("CryptoCoinExchangeProvider", RateType.DEFERRED ).set("providerDescription","nothing").build();
+    }
 }

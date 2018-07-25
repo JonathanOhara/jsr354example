@@ -4,7 +4,6 @@ import edu.ac.jsr354example.domain.Value;
 import edu.ac.jsr354example.provider.CryptoCoinExchangeRateProvider;
 import edu.ac.jsr354example.repository.ValueRepository;
 import org.javamoney.moneta.CurrencyUnitBuilder;
-import org.javamoney.moneta.Money;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +12,9 @@ import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import javax.money.convert.ExchangeRateProvider;
 import javax.money.convert.MonetaryConversions;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.stream.Stream;
+import javax.money.format.MonetaryAmountFormat;
+import javax.money.format.MonetaryFormats;
+import java.util.Locale;
 
 @Service
 public class MoneyQueuerService {
@@ -33,28 +32,34 @@ public class MoneyQueuerService {
         return repository.pull().map(value -> value.getMoney()).orElse(null);
     }
 
-    public String convert(MonetaryAmount monetaryAmount, String format) {
 
-        ExchangeRateProvider rateProvider = MonetaryConversions.getExchangeRateProvider();
+    public MonetaryAmount convert(MonetaryAmount monetaryAmount, String toFormat) {
+        return convert(monetaryAmount, toFormat.contains("CCC") ? CurrencyUnitBuilder.of("CCC", "CryptoCoinProvider").build() : Monetary.getCurrency(toFormat));
+    }
 
-        if(containsOurOwnCurrency(monetaryAmount, format)){
+    public MonetaryAmount convert(MonetaryAmount monetaryAmount, CurrencyUnit to) {
+
+        ExchangeRateProvider rateProvider = null;
+
+        if(containsOurOwnCurrency(monetaryAmount, to)){
+             rateProvider = new CryptoCoinExchangeRateProvider();
             // The line below was supposed to be:
-            // rateProvider = MonetaryConversions.getExchangeRateProvider("CryptoCoinExchangeProvider");
+            //rateProvider = MonetaryConversions.getExchangeRateProvider("CryptoCoinExchangeProvider");
             // but I'm getting: Invalid ExchangeRateProvider (not found)
-            rateProvider = new CryptoCoinExchangeRateProvider();
+
+        }else{
+            rateProvider = MonetaryConversions.getExchangeRateProvider();
         }
 
-        return rateProvider.getCurrencyConversion( Monetary.getCurrency("BRL") ).apply(monetaryAmount).toString();
+        return rateProvider.getCurrencyConversion(to).apply(monetaryAmount);
     }
 
-    private boolean containsOurOwnCurrency(MonetaryAmount monetaryAmount, String format) {
-        return monetaryAmount.getCurrency().getCurrencyCode().equals("CCC") || format.equals("CCC");
+    private boolean containsOurOwnCurrency(MonetaryAmount monetaryAmount, CurrencyUnit format) {
+        return monetaryAmount.getCurrency().getCurrencyCode().equals("CCC") || format.getCurrencyCode().equals("CCC");
     }
 
-    public static void main(String[] args) {
-        MoneyQueuerService service = new MoneyQueuerService();
-
-        System.out.println(service.convert(Money.of(250, CurrencyUnitBuilder.of("CCC", "CryptoCoinProvider").build()), "BRL"));
-
+    public String format(MonetaryAmount monetaryAmount, String locale) {
+        MonetaryAmountFormat requestFormatted = MonetaryFormats.getAmountFormat(new Locale.Builder().setLanguageTag(locale).build());
+        return requestFormatted.format(monetaryAmount);
     }
 }

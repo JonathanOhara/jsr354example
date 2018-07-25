@@ -1,10 +1,15 @@
 package edu.ac.jsr354example.controller;
 
 import edu.ac.jsr354example.service.MoneyQueuerService;
+import org.javamoney.moneta.CurrencyUnitBuilder;
 import org.javamoney.moneta.Money;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.money.CurrencyUnit;
+import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import javax.money.format.MonetaryAmountFormat;
 import javax.money.format.MonetaryFormats;
@@ -18,29 +23,29 @@ public class MoneyQueuerController {
     private MoneyQueuerService service;
 
     @PostMapping("/{currency}")
-    public MonetaryAmount push(@PathVariable("currency")String currency, BigDecimal value){
+    public ResponseEntity<MonetaryAmount> push(@PathVariable("currency")String currency, @RequestBody BigDecimal value){
         MonetaryAmount moneyAmount = Money.of(value, currency);
 
-        return service.push(moneyAmount);
+        return new ResponseEntity<>( service.push(moneyAmount), HttpStatus.CREATED );
     }
 
-    @GetMapping("/{currency}")
-    public MonetaryAmount pull(@PathVariable("currency")String currency){
-        return service.pull();
+    @GetMapping("")
+    public ResponseEntity<MonetaryAmount> pull(){
+        return new ResponseEntity<>( service.pull(), HttpStatus.OK );
     }
 
 
-    @GetMapping("/{currency}/formats/{format}")
-    public String pullFormatted(@PathVariable("currency")String currency, @PathVariable("format")String format){
+    @GetMapping("/formats/{format}")
+    public ResponseEntity<String> pullFormatted(@PathVariable("format")String format){
         MonetaryAmount monetaryAmount = service.pull();
-        MonetaryAmountFormat moneyFormat = MonetaryFormats.getAmountFormat(format);
-        return moneyFormat.format(monetaryAmount);
+
+        return new ResponseEntity<>(  service.format(monetaryAmount, format), HttpStatus.OK );
     }
 
-    @GetMapping("/{currency}/conversions/{currency}")
-    public String pullConverted(@PathVariable("currency")String currency, @PathVariable("currency")String format){
+    @GetMapping("/conversions/{currency}")
+    public ResponseEntity<MonetaryAmount> pullConverted(@PathVariable("currency")String format){
         MonetaryAmount monetaryAmount = service.pull();
-        return service.convert(monetaryAmount, format);
+        return new ResponseEntity<>( service.convert(monetaryAmount, format), HttpStatus.OK );
     }
 
 }

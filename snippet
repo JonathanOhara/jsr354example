@@ -298,9 +298,9 @@ And here is the Builder for that:
 <script src="https://gist.github.com/JonathanOhara/785bae72dcd60a84a9bc18f61a469f9e.js"></script>
 <!--
 <pre>
-MonetaryAmountFormat builderFormat = MonetaryAmountDecimalFormatBuilder.of("R$ ###,###.00").build();
+MonetaryAmountFormat builderFormat = MonetaryAmountDecimalFormatBuilder.of("###,###.00 BRL").build();
 System.out.println(builderFormat.format(Money.of(1000.22, "BRL")));
-//Output: R$ 1,000.22
+//Output: 1,000.22 BRL
 </pre>
 -->
 
@@ -321,8 +321,10 @@ Conclusion
 </h2>
 
 <p>
-The JSR 354 is a very flexible and extensible way to handle money. These days the applications reach a huge number of countries, with this JSR we can offer to our users a better experience when they visualize money values (in terms of conversion and formatting), being ready to new currencies like crypto coins is another important point. In the Links section, there's a link to my GitHub where I made a simple REST application to show some example operations and an implementation of a new currency as well its own conversion handler.
-
+The JSR 354 is a very flexible and extensible way to handle money. These days the applications reach a huge number of countries, with this JSR we can offer to our users a better experience when they visualize money values (in terms of conversion and formatting), being ready to new currencies like crypto coins is another important point.
+</p>
+<p>
+In the Links section, there's a link to a project in my GitHub. In this project I created a very simple REST application, the objective is just to show some of the operations that I mentioned in this snippet and show an implementation of a new currency as well its own conversion handler.
 </p>
 
 <h2>

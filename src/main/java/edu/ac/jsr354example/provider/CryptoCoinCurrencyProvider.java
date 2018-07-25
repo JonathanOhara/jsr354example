@@ -12,12 +12,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CryptoCoinCurrencyProvider implements CurrencyProviderSpi{
-    private final String PROVIDER_NAME = "CryptoCoinProvider";
+    private final String PROVIDER_NAME = "CryptoCoinContextProvider";
 
     private Set<CurrencyUnit> currencies;
     private CurrencyContext context = CurrencyContextBuilder.of(PROVIDER_NAME).build();
-
-
 
     public CryptoCoinCurrencyProvider(){
         currencies = new HashSet<>();
@@ -40,6 +38,6 @@ public class CryptoCoinCurrencyProvider implements CurrencyProviderSpi{
 
     @Override
     public boolean isCurrencyAvailable(CurrencyQuery query) {
-        return true;
+        return !getCurrencies(query).isEmpty();
     }
 }

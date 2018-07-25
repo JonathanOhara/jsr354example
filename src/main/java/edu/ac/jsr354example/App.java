@@ -10,7 +10,6 @@ import javax.money.CurrencyUnit;
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
 import javax.money.convert.ExchangeRateProvider;
-import javax.money.convert.MonetaryConversions;
 
 @SpringBootApplication
 public class App {
